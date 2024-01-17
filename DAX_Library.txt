@@ -1,0 +1,993 @@
+REVISED [X] PY = Last condition: CALCULATE('ENTITY'[Measure], DATEADD('Date'[Date], -1, YEAR)))))
+
+REVISED COMMISSION AVERAGE = CALCULATE(SUM([Commission $ Amount])/[GWP],FILTER('DRAKE','DRAKE'[Broker Commission]>0))
+
+NotInSLA = 
+IF (
+ SELECTEDVALUE ( 'Timeframe'[TimeframeCode] ) = "YTD",
+ CALCULATE ( 'JobTraq'[NotInSLA_Count], DATESYTD ( 'Date'[Date] ) ),
+ IF (
+ SELECTEDVALUE ( 'Timeframe'[TimeframeCode] ) = "R12",
+ CALCULATE (
+ 'JobTraq'[NotInSLA_Count],
+ DATESINPERIOD ( 'Date'[Date], MAX ( 'Date'[Date] ), -12, MONTH )
+ ),
+ IF (
+ SELECTEDVALUE ( 'Timeframe'[TimeframeCode] ) = "Date range",
+ CALCULATE ( 'JobTraq'[NotInSLA_Count] )
+ )
+)
+)
+
+DNU: Submissions # Productivity = USERELATIONSHIP('Date'[Date],'BrokerProductivity'[Inception Date])
+
+Quote # Productivity = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[Quotes],DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[Quotes],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[Quotes],USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])))))
+
+Bind # Productivity = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[Binds],DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[Binds],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[Binds],USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])))))
+
+Submission # Productivity = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[Submissions],DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[Submissions],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[Submissions],USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])))))
+
+NTU # Productivity = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[NTUs],DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[NTUs],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[NTUs],USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])))))
+
+Decline # Productivity = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[Declines],DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[Declines],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[Declines],USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])))))
+
+Submission # PY Productivity = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[Submissions],SAMEPERIODLASTYEAR(DATESYTD('Date'[Date])),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[Submissions],SAMEPERIODLASTYEAR(DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[Submissions],USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate])))))
+CALCULATE('ENTITY'[Measure], DATEADD('Date'[Date], -1, YEAR)))))
+
+S/B % Productivity = DIVIDE([Bind # Productivity],[Submission # Productivity])
+
+S/D % Productivity = DIVIDE([Decline # Productivity],[Submission # Productivity])
+
+S/Q % Productivity = DIVIDE([Quote # Productivity],[Submission # Productivity])
+
+Q/B % Productivity = DIVIDE([Bind # Productivity],[Quote # Productivity])
+
+R12 # Binds Productivity = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Bind] ),
+'BrokerProductivity'[Bind]="1")
+,DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate]))
+
+R12 # Decls Productivity = CALCULATE('BrokerProductivity'[SubmissionKey],FILTER(
+ALL ( BrokerProductivity[Status] ),
+'BrokerProductivity'[Status] = "Declined")
+,DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate]))
+
+R12 # NTU Productivity = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Status] ),
+'BrokerProductivity'[Status] = "NTU")
+,DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate]))
+
+R12 # Quotes Productivity = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Quote] ),
+'BrokerProductivity'[Quote] = "1")
+,DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate]))
+
+R12 # SQB Productivity = CALCULATE('BrokerProductivity'[SubmissionKey],
+DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate]))
+
+R12 Q/B % Productivity = DIVIDE([R12 # Binds Productivity],[R12 # Quotes Productivity])
+
+R12 S/B % Productivity = DIVIDE([R12 # Binds Productivity],[R12 # SQB Productivity])
+
+R12 S/D % Productivity = DIVIDE([R12 # Decls Productivity],[R12 # SQB Productivity])
+
+R12 S/Q % Productivity = DIVIDE([R12 # Quotes Productivity],[R12 # SQB Productivity])
+
+YTD # Binds Productivity = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Bind] ),
+'BrokerProductivity'[Bind] = "1" ),DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate]))
+
+YTD # Decls Productivity = CALCULATE('BrokerProductivity'[SubmissionKey],FILTER(
+ALL ( BrokerProductivity[Status] ),
+'BrokerProductivity'[Status] = "Declined"),DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate]))
+
+YTD # NTU Productivity = CALCULATE('BrokerProductivity'[SubmissionKey],FILTER(
+ALL ( BrokerProductivity[Status] ),
+'BrokerProductivity'[Status] = "NTU"),DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate]))
+
+YTD # Quotes Productivity = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Quote] ),
+'BrokerProductivity'[Quote] = "1"),DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate]))
+
+YTD Q/B % Productivity = DIVIDE([YTD # Binds Productivity],[YTD # Quotes Productivity])
+
+YTD S/B % Productivity = DIVIDE([YTD # Binds Productivity],[YTD SQB # Productivity])
+
+YTD S/D % Productivity = DIVIDE([YTD # Decls Productivity],[YTD SQB # Productivity])
+
+YTD S/Q % Productivity = DIVIDE([YTD # Quotes Productivity],[YTD SQB # Productivity])
+
+YTD SQB # Productivity = CALCULATE('BrokerProductivity'[SubmissionKey],DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate]))
+
+YTD SQB PY # Productivity = CALCULATE(BrokerProductivity[SubmissionKey],SAMEPERIODLASTYEAR(DATESYTD('Date'[Date])),USERELATIONSHIP('Date'[Date],'BrokerProductivity'[RoundedInceptionDate]))
+
+Measures to update based on Power Station - Remove DATESBETWEEN function and just use a straight CALCULATE('Table'[Measure]):
+
+Pol #
+Pol # PY
+Premium PY
+Premium
+Premium_Productivity
+Premium_Lost_Accounts
+Bind #
+Decline #
+Quote #
+Submission #
+NTU #
+
+I. Conditional Formatting
+
+--Percentages
+
+--SQB works the best. Something isn't quite right with how this works on paper but it seems to work when implemented.
+
+In general:
+
+>= 0 # < .01 Red
+is 0 # Yellow
+>=.01 #, < .5 # Red
+>=.5 #, <= 1 # Green
+>=1 #, <= blank
+
+--As of 03/24/2020:
+
+S:B %
+
+>= 0 % < 0 # Red
+>= 0 # < .01 # Red
+is 0 # Yellow
+>=.01 #, <= .5 # Green
+>=.5 #, <= 1 # Green
+>=1 #, <= 100 %
+
+S:D %
+
+>= 0 % < 0 # Green
+>= 0 # < .01 # Green
+is 0 # Yellow
+>=.01 #, <= .5 # Red
+>=.5 #, <= 1 # Red
+>=1 #, <= 100 % Red
+
+Q:B %
+
+>= 0 % < 0 # Red
+>= 0 # < .01 # Red
+is 0 # Yellow
+>=.01 #, <= .5 # Green
+>=.5 #, <= 1 # Green
+>=1 #, <= 100 %
+
+--Numbers
+
+This seems to work on the Performance tables.
+
+>= -100 # < .01 # Red
+is 0 # Yellow
+>= .01 # <= 1 Green
+>= 1 # <=100 # Green
+
+(2112
+Exec Broker Pack)
+
+II. Labels
+
+DataAsOf = "Data as of: " & CALCULATE(MAX('Date'[Date]),DATESBETWEEN('Date'[Date],MAX('Date'[Date]),MAX('Date'[Date])))//FORMAT(MAX('Date'[Date]),"MM/DD/YYYY")
+
+^^ This works better: MAXX(ALLSELECTED('Date'),'Date'[Date])
+
+Data_As_Of = "Data prepared: " & FORMAT(MAX('DRAKE'[DataAsOf]),"MM/DD/YYYY")
+
+Title_Confidential = "CONFIDENTIAL"
+
+Instructions_ResetFilter = "Press this button to reset filters. This will clear the selections you made and reset the report entirely."
+Instructions_ReturnToFilters = "Press this button to return to the Filters page to update filters."
+Instructions_BackArrow = "Press this button to return to the last page you were on."
+Instructions_TabFilters = "Each tab has their own independent date and timeframe filter. A date change on one tab will not affect the others."
+Instructions_InceptionDateBasis = "Polices and submissions are based on inception date. The earliest inception date is " & MIN('DRAKE'[Inception Date]) & "."
+
+Title_UsefulLinks = "Useful Links"
+Title_Datasets = "Datasets"
+Title_DatasetsInstructions = "Click the ... in the upper right-hand corner of the table (hover over it) and select 'Export data'"
+Title_Instructions = "Instructions"
+Title_ViewFilters = "View Filters"
+
+Instructions_Timeframe = "Use the YTD and R12 selections in Timeframe to compare time periods. Use Date Range for custom date comparisons
+that are not YTD or R12 (quarterly, monthly, weekly)"
+
+Instructions_BookLogRefreshNotes = "Book Log auto refreshes until 5PM EST. 24-hour refresh coming soon."
+
+Label_AllFiltersNotice = "For a complete list of filters, see the Filters page."
+
+III. Toggles
+
+Selection_Timeframe = "Timeframe: " & SELECTEDVALUE('Timeframe'[TimeframeCode])
+
+Selection_Basis = "Premium: " & SELECTEDVALUE('Basis'[BasisName])
+
+IV. Measures
+
+--Date
+
+DataAsOf = "Data as of: " & CALCULATE(MAX('Date'[Date]),DATESBETWEEN('Date'[Date],MAX('Date'[Date]),MAX('Date'[Date])))//FORMAT(MAX('Date'[Date]),"MM/DD/YYYY")
+
+--Policy
+
+Data_As_Of = "Data prepared: " & FORMAT(MAX('DRAKE'[DataAsOf]),"MM/DD/YYYY")
+
+IF(SELECTEDVALUE ('Basis'[BasisName])="Net",CALCULATE('DRAKE'[NWP]),CALCULATE('DRAKE'[GWP]))
+
+--Multi-currency
+
+1.)	Create measure for currency selection
+
+SelectedCurrency = SELECTEDVALUE('CurrencySelection'[CurrencyCode])
+
+2.)	Modify measure Premium_GWPNWP = Premium_GWPNWP = 
+
+IF(
+    SELECTEDVALUE('Basis'[BasisName])="Net",
+        IF([SelectedCurrency]="USD",CALCULATE('PolicyDetail'[NWP]),
+        IF([SelectedCurrency]="GBP",CALCULATE('PolicyDetail'[NWP_GBP]),
+        IF([SelectedCurrency]="CAD",CALCULATE('PolicyDetail'[NWP_CAD]),
+        IF([SelectedCurrency]="EUR",CALCULATE('PolicyDetail'[NWP_EUR]))))),
+IF(SELECTEDVALUE('Basis'[BasisName])="Gross",
+        IF([SelectedCurrency]="USD",CALCULATE('PolicyDetail'[GWP]),
+        IF([SelectedCurrency]="GBP",CALCULATE('PolicyDetail'[GWP_GBP]),
+       IF([SelectedCurrency]="CAD",CALCULATE('PolicyDetail'[GWP_CAD]),
+        IF([SelectedCurrency]="EUR",CALCULATE('PolicyDetail'[GWP_EUR])))))
+
+3.)	Create measures for premium and commissions:
+
+Premium:
+
+GWP_CAD = SUM(PolicyDetail[GWPCAD])
+GWP_EUR = SUM(PolicyDetail[GWPEUR])
+GWP_GBP = SUM(PolicyDetail[GWPGBP])
+GWP = SUM(PolicyDetail[GWPStraight]) /* USD*/
+
+Commission:
+
+Commissions = 
+IF([SelectedCurrency]="USD",CALCULATE(SUM('PolicyDetail'[Commission $ Amount])),
+IF([SelectedCurrency]="GBP",CALCULATE(SUM('PolicyDetail'[Commission $ Amount GBP])),
+IF([SelectedCurrency]="CAD",CALCULATE(SUM('PolicyDetail'[Commission $ Amount CAD])),
+IF([SelectedCurrency]="EUR",CALCULATE(SUM('PolicyDetail'[Commission $ Amount EUR]))))))
+
+Needs to be variablized: Commission Average = CALCULATE(SUM([Commission $ Amount])/[GWP],FILTER('PolicyDetail','PolicyDetail'[Broker Commission]>0))/*CALCULATE(AVERAGE('DRAKE'[Broker Commission])/100,FILTER('DRAKE','DRAKE'[Broker Commission]>0))*/
+
+xLY FY = CALCULATE (
+          'DRAKE'[Premium_GWPNWP], FILTER('Date',
+                    'Date'[EffectiveYear]=MAX ('Date'[EffectiveYear] ) - 1))
+
+--Might be better
+LY FY = CALCULATE (
+          'DRAKE'[Premium_GWPNWP], FILTER('Date',
+                    'Date'[EffectiveYear]=YEAR(TODAY() ) - 1))
+
+--Might best =)
+LY FY = CALCULATE (
+          'DRAKE'[Premium_GWPNWP], FILTER('Calendar',
+                    YEAR(TODAY() ) - 1))
+
+Supreme: CALCULATE('PolicyDetail'[Premium_GWPNWP], FILTER(ALL('Date'),'Date'[EffectiveYear]=MAX('Date'[EffectiveYear])-1))
+
+Calculated column required in Date table: EffectiveYear = YEAR('Date'[Year])
+
+Global Broker Pack: CALCULATE(SUM('PolicyDetail'[GWPStraight]), FILTER(ALL('Date'),'Date'[EffectiveYear]=MAX('Date'[EffectiveYear])-1))
+
+LocktonBAC = IF(HotSprings[NewOrRenewal]="New",HotSprings[NWP]*.025,If(HotSprings[NewOrRenewal]="Renewal",0))
+RSGBAC = IF(HotSprings[NewOrRenewal]="New",HotSprings[NWP]*.015,If(HotSprings[NewOrRenewal]="Renewal",0))
+StandardBAC = IF(HotSprings[NewOrRenewal]="New",HotSprings[NWP]*.02,If(HotSprings[NewOrRenewal]="Renewal",HotSprings[NWP]*.005))
+
+CY FY = CALCULATE (
+          SUM('DRAKE'[GWPStraight]), FILTER('DRAKE',
+                    'DRAKE'[InceptionYear]=MAX ('DRAKE'[InceptionYear] )))
+
+FY Diff $ = [LY FY]-[CY FY]
+
+FY Diff % = DIVIDE(('DRAKE'[CY FY]-'DRAKE'[LY FY]),'DRAKE'[LY FY])
+
+MaxEffectiveDate = MAX([Inception Date])
+
+Pol # PY = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('DRAKE'[PolicyNumber],SAMEPERIODLASTYEAR(DATESYTD('Date'[Date]))),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('DRAKE'[PolicyNumber],SAMEPERIODLASTYEAR(DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('DRAKE'[PolicyNumber],SAMEPERIODLASTYEAR(DATESBETWEEN('Date'[Date],MIN('Date'[Date]),MAX('Date'[Date])))))))
+CALCULATE('ENTITY'[Measure], DATEADD('Date'[Date], -1, YEAR)))))
+
+Policy # = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('DRAKE'[PolicyNumber],DATESYTD('Date'[Date])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('DRAKE'[PolicyNumber],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('DRAKE'[PolicyNumber]))))
+
+PolicyNumber = DISTINCTCOUNT('DRAKE'[PolicyNumberForMeasure])
+
+DistinctBrokerContact = DISTINCTCOUNT('DRAKE'[Credited Broker Contact])
+
+Broker Contact # = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('DRAKE'[DistinctBrokerContact],DATESYTD('Date'[Date])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('DRAKE'[DistinctBrokerContact],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('DRAKE'[DistinctBrokerContact]))))
+
+Premium = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('DRAKE'[Premium_GWPNWP],DATESYTD('Date'[Date])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('DRAKE'[Premium_GWPNWP],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('DRAKE'[Premium_GWPNWP]))))
+
+Premium GWP = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('DRAKE'[GWP],DATESYTD('Date'[Date])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('DRAKE'[GWP],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('DRAKE'[GWP]))))
+Premium NWP = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('DRAKE'[NWP],DATESYTD('Date'[Date])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('DRAKE'[NWP],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('DRAKE'[NWP]))))
+
+Premium PY = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('DRAKE'[Premium_GWPNWP],SAMEPERIODLASTYEAR(DATESYTD('Date'[Date]))),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('DRAKE'[Premium_GWPNWP],SAMEPERIODLASTYEAR(DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('DRAKE'[Premium_GWPNWP]))))
+CALCULATE('ENTITY'[Measure], DATEADD('Date'[Date], -1, YEAR)))))
+
+Premium Lost Accounts = IF(SELECTEDVALUE('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('DRAKE'[Premium_GWPNWP], DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[ExpirationDate],'DRAKE'[Expiration Date]), 'DRAKE'[Lost account]="Yes"),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+CALCULATE('DRAKE'[Premium_GWPNWP], DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[ExpirationDate],'DRAKE'[Expiration Date]), 'DRAKE'[Lost account]="Yes"),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+CALCULATE('DRAKE'[Premium_GWPNWP], USERELATIONSHIP('Date'[ExpirationDate],'DRAKE'[Expiration Date]), 'DRAKE'[Lost account]="Yes"))))
+
+AKA: Premium_Lost_Accounts = IF(SELECTEDVALUE('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('DRAKE'[Premium_GWPNWP], DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[ExpirationDate],'DRAKE'[RoundedExpirationDate]), 'LostAccount'[Lost account]="Yes"),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+CALCULATE('DRAKE'[Premium_GWPNWP], DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[ExpirationDate],'DRAKE'[RoundedExpirationDate]), 'LostAccount'[Lost account]="Yes"),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+CALCULATE('DRAKE'[Premium_GWPNWP],USERELATIONSHIP('Date'[ExpirationDate],'DRAKE'[RoundedExpirationDate]), 'LostAccount'[Lost account]="Yes"))))
+
+Commissions = CALCULATE(SUM('DRAKE'[Commission $ Amount]))
+
+Commissions Paid = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+                           CALCULATE('DRAKE'[Commissions],DATESYTD('Date'[Date])),
+             IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+             CALCULATE('DRAKE'[Commissions],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+                          CALCULATE('DRAKE'[Commissions]))))
+
+Commissions Paid PY = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+                                         CALCULATE('DRAKE'[Commissions Paid],SAMEPERIODLASTYEAR(DATESYTD('Date'[Date]))),
+             IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+                          CALCULATE('DRAKE'[Commissions Paid],SAMEPERIODLASTYEAR(DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+CALCULATE('DRAKE'[Commissions], DATEADD('Date'[Date], -1, YEAR)))))
+
+Commission Average = CALCULATE(AVERAGE('DRAKE'[Broker Commission])/100,FILTER('DRAKE','DRAKE'[Broker Commission]<>0))
+
+Commission Average Paid = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+                                         CALCULATE('DRAKE'[Commission Average],DATESYTD('Date'[Date])),
+             IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+                          CALCULATE('DRAKE'[Commission Average],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+                          CALCULATE('DRAKE'[Commission Average]))))
+
+Commission Average Paid PY = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+                                         CALCULATE('DRAKE'[Commission Average Paid],SAMEPERIODLASTYEAR(DATESYTD('Date'[Date]))),
+             IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+                          CALCULATE('DRAKE'[Commission Average Paid],SAMEPERIODLASTYEAR(DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+CALCULATE('DRAKE'[Commission Average Rate], DATEADD('Date'[Date], -1, YEAR)))))
+
+xPremium_GWPNWP = IF(SELECTEDVALUE ('Basis'[BasisName])="Net",CALCULATE('DRAKE'[NWP]),CALCULATE('DRAKE'[GWP]))
+
+xR12 = CALCULATE('DRAKE'[Premium_GWPNWP],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))
+
+R12 # = CALCULATE('DRAKE'[PolicyNumber],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))
+
+xR12 PY = CALCULATE(DRAKE[Premium_GWPNWP],SAMEPERIODLASTYEAR(DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)))
+
+xR12 PY # = CALCULATE(DRAKE[PolicyNumber],SAMEPERIODLASTYEAR(DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)))
+
+R12 Var # = [R12 #]-[R12 PY #]
+
+R12 Var % = DIVIDE([R12]-[R12 PY],[R12 PY])
+
+R12 Var $ = [R12]-[R12 PY]
+
+Var # = 'DRAKE'[Policy #]-'DRAKE'[Pol # PY]
+
+Var % = DIVIDE(('DRAKE'[Premium]-'DRAKE'[Premium PY]),'DRAKE'[Premium PY])
+
+Var $ = 'DRAKE'[Premium]-'DRAKE'[Premium PY]
+
+xYTD = CALCULATE(DRAKE[Premium_GWPNWP],DATESYTD('Date'[Date]))
+
+YTD # = CALCULATE(DRAKE[PolicyNumber],DATESYTD('Date'[Date]))
+
+YTD PY # = CALCULATE(CALCULATE(DRAKE[PolicyNumber]),SAMEPERIODLASTYEAR(DATESYTD('Date'[Date])))
+
+xYTD PY $ = CALCULATE(DRAKE[Premium_GWPNWP],SAMEPERIODLASTYEAR(DATESYTD('Date'[Date])))
+
+YTD Var % = DIVIDE(('DRAKE'[YTD]-'DRAKE'[YTD PY $]),'DRAKE'[YTD PY $])
+
+YTD Var # = [YTD #]-[YTD PY #]
+
+YTD Var $ = [YTD]-[YTD PY $]
+
+--Submissions/Quotes/Binds:
+
+Bind # = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[Binds],DATESYTD('Date'[Date])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[Binds],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[Binds],DATESBETWEEN('Date'[Date],MIN('Date'[Date]),MAX('Date'[Date]))))))
+
+Binds = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Bind] ),
+'BrokerProductivity'[Bind] = "1"))
+
+Declines # = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[Declines],DATESYTD('Date'[Date])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[Declines],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[Declines],DATESBETWEEN('Date'[Date],MIN('Date'[Date]),MAX('Date'[Date]))))))
+
+Declines = CALCULATE('BrokerProductivity'[SubmissionKey],FILTER(
+ALL ( BrokerProductivity[Status]),
+ 'BrokerProductivity'[Status] = "Declined"))
+
+S/D % = DIVIDE([Declines #],[Submission #])
+
+Q/B % = DIVIDE([Bind #],[Quote #])
+
+Quote # = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[Quotes],DATESYTD('Date'[Date])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[Quotes],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[Quotes],DATESBETWEEN('Date'[Date],MIN('Date'[Date]),MAX('Date'[Date]))))))
+
+Quotes = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Quote]),
+ 'BrokerProductivity'[Quote] = "1"))
+
+NTU # = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[NTUs],DATESYTD('Date'[Date])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[NTUs],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[NTUs],DATESBETWEEN('Date'[Date],MIN('Date'[Date]),MAX('Date'[Date]))))))
+
+NTUs = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Status] ),
+'BrokerProductivity'[Status] = "NTU"))
+
+RiskID = DISTINCTCOUNT('BrokerProductivity'[RiskIDForMeasure])
+
+RiskID # = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[RiskID],DATESYTD('Date'[Date])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[RiskID],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[RiskID],DATESBETWEEN('Date'[Date],MIN('Date'[Date]),MAX('Date'[Date]))))))
+
+S/Q % = DIVIDE([Quote #],[Submission #])
+
+S/D % = DIVIDE([Declines #],[Submission #])
+
+S/B % = DIVIDE([Bind #],[Submission #])
+
+Submission # = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[Submissions],DATESYTD('Date'[Date])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[Submissions],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[Submissions],DATESBETWEEN('Date'[Date],MIN('Date'[Date]),MAX('Date'[Date]))))))
+
+Submission # PY = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('BrokerProductivity'[Submissions],SAMEPERIODLASTYEAR(DATESYTD('Date'[Date]))),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('BrokerProductivity'[Submissions],SAMEPERIODLASTYEAR(DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('BrokerProductivity'[Submissions],SAMEPERIODLASTYEAR(DATESBETWEEN('Date'[Date],MIN('Date'[Date]),MAX('Date'[Date])))))))
+CALCULATE('ENTITY'[Measure], DATEADD('Date'[Date], -1, YEAR)))))
+
+SubmissionKey = DISTINCTCOUNT('BrokerProductivity'[SubmissionKeyForMeasure])
+
+Submissions = CALCULATE('BrokerProductivity'[SubmissionKey],FILTER(
+ALL ( BrokerProductivity[Submission]),
+ 'BrokerProductivity'[Submission] = "1"))
+
+Premium_Productivity = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('DRAKE'[Premium_GWPNWP],DATESYTD('Date'[Date])),
+  IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+  CALCULATE('DRAKE'[Premium_GWPNWP],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH)),
+ IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+  CALCULATE('DRAKE'[Premium_GWPNWP],SAMEPERIODLASTYEAR(DATESBETWEEN('Date'[Date],MIN('Date'[Date]),MAX('Date'[Date])))))))
+
+Premium_GWPNWP_Productivity = IF(SELECTEDVALUE ('Basis'[BasisName])="Net",CALCULATE('DRAKE'[NWP]),CALCULATE('DRAKE'[GWP]))
+
+GWP_Productivity = CALCULATE(SUM(BrokerProductivity[GWPStraight]))
+
+NWP_Productivity = CALCULATE(SUM('DRAKE'[NWPStraight]))
+
+Premium Lost Accounts = IF(SELECTEDVALUE('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('DRAKE'[Premium_GWPNWP], DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[ExpirationDate],'DRAKE'[Expiration Date]), 'DRAKE'[Lost account]="Yes"),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+CALCULATE('DRAKE'[Premium_GWPNWP], DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[ExpirationDate],'DRAKE'[Expiration Date]), 'DRAKE'[Lost account]="Yes"),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+CALCULATE('DRAKE'[Premium_GWPNWP], DATESBETWEEN('Date'[Date],MIN('Date'[Date]),MAX('Date'[Date])),USERELATIONSHIP('Date'[ExpirationDate],'DRAKE'[Expiration Date]), 'DRAKE'[Lost account]="Yes"))))
+
+Zero = 0
+
+--To ensure (BLANK) does not appear in KPIs.
+Timeliness KPI = IF(ISBLANK([Timely DPR Count]),0,[Timely DPR Count])
+
+--Switch to PolicyNumber?
+R12 Binds = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Bind] ),
+'BrokerProductivity'[Bind]="1")
+,DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))
+
+R12 # Decls = CALCULATE('BrokerProductivity'[SubmissionKey],FILTER(
+ALL ( BrokerProductivity[Status] ),
+'BrokerProductivity'[Status] = "Declined")
+,DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))
+
+R12 # NTU = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Status] ),
+'BrokerProductivity'[Status] = "NTU")
+,DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))
+
+R12 # Quotes = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Quote] ),
+'BrokerProductivity'[Quote] = "1")
+,DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))
+
+R12 # SQB = CALCULATE('BrokerProductivity'[SubmissionKey],
+DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))
+
+R12 Q/B % = DIVIDE([R12 # Binds],[R12 # Quotes])
+
+R12 S/B % = DIVIDE([R12 # Binds],[R12 # SQB])
+
+R12 S/D % = DIVIDE([R12 # Decls],[R12 # SQB])
+
+R12 S/Q % = DIVIDE([R12 # Quotes],[R12 # SQB])
+
+R12 SQB $ = CALCULATE('DRAKE'[Premium_GWPNWP],DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))
+
+YTD # Binds = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Bind] ),
+'BrokerProductivity'[Bind] = "1" ),DATESYTD('Date'[Date]))
+
+YTD # Decls = CALCULATE('BrokerProductivity'[SubmissionKey],FILTER(
+ALL ( BrokerProductivity[Status] ),
+'BrokerProductivity'[Status] = "Declined"),DATESYTD('Date'[Date]))
+
+YTD # NTU = CALCULATE('BrokerProductivity'[SubmissionKey],FILTER(
+ALL ( BrokerProductivity[Status] ),
+'BrokerProductivity'[Status] = "NTU"),DATESYTD('Date'[Date]))
+
+YTD # Quotes = CALCULATE('BrokerProductivity'[RiskID],FILTER(
+ALL ( BrokerProductivity[Quote] ),
+'BrokerProductivity'[Quotes] = "1"),DATESYTD('Date'[Date]))
+
+YTD Q/B % = DIVIDE([YTD # Binds],[YTD # Quotes])
+
+YTD S/B % = DIVIDE([YTD # Binds],[YTD SQB #])
+
+YTD S/D % = DIVIDE([YTD # Decls],[YTD SQB #])
+
+YTD S/Q % = DIVIDE([YTD # Quotes],[YTD SQB #])
+
+YTD SQB # = CALCULATE('BrokerProductivity'[SubmissionKey],DATESYTD('Date'[Date]))
+
+YTD SQB PY # = CALCULATE(BrokerProductivity[SubmissionKey],SAMEPERIODLASTYEAR(DATESYTD('Date'[Date])))
+
+Submission Var # = [Submission #]-[Submission # PY]
+
+Submission Var % = IFERROR(DIVIDE(([Submission #]-[Submission # PY]),[Submission # PY]),0) or IFERROR(([Submission #]-[Submission # PY])-[Submission # PY],0)
+
+Quote Var # = [Quote #]-[Quote # PY]
+
+Quote Var % = IFERROR(DIVIDE(([Quote #]-[Quote # PY]),[Quote # PY]),0)
+
+Bind Var # = [Bind #]-[Bind # PY]
+
+Bind Var % = IFERROR(DIVIDE(([Bind #]-[Bind # PY]),[Bind # PY]),0)
+
+S/B PY % = DIVIDE([Binds # PY],[Submissions # PY])
+
+S/Q PY % = DIVIDE([Quotes # PY],[Submissions # PY])
+
+Q/B PY % = DIVIDE([Binds # PY],[Quotes # PY])
+
+S/B Var % = IFERROR([S/B %]-[S/B PY %],0)
+
+S/Q Var % = IFERROR([S/Q %]-[S/Q PY %],0)
+
+Q/B Var % = IFERROR([Q/B]-[Q/B PY],0)
+
+Submission # PY = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+                           CALCULATE('BrokerProductivity'[SubmissionKey],SAMEPERIODLASTYEAR(DATESYTD('Date'[Date]))),
+             IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+             CALCULATE('BrokerProductivity'[SubmissionKey],SAMEPERIODLASTYEAR(DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+CALCULATE('BrokerProductivity'[SubmissionKey], DATEADD('Date'[Date], -1, YEAR)))))
+
+Quote # PY = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+                           CALCULATE('BrokerProductivity'[Quotes],SAMEPERIODLASTYEAR(DATESYTD('Date'[Date]))),
+             IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+             CALCULATE('BrokerProductivity'[Quotes],SAMEPERIODLASTYEAR(DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+CALCULATE('BrokerProductivity'[Quotes], DATEADD('Date'[Date], -1, YEAR)))))
+
+Bind # PY = IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="YTD",
+                           CALCULATE('BrokerProductivity'[Binds],SAMEPERIODLASTYEAR(DATESYTD('Date'[Date]))),
+             IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+             CALCULATE('BrokerProductivity'[Binds],SAMEPERIODLASTYEAR(DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH))),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+CALCULATE('BrokerProductivity'[Binds], DATEADD('Date'[Date], -1, YEAR)))))
+
+
+
+--Budget
+
+--For team dashboards, use all measures from Budget table. Use individual tables for dimensions.
+
+--Relationships: Budget: ParentName --> DRAKE and BudgetParent ParentName; Parent name --> DRAKE and BrokerProductivity
+
+% Budget Met = DIVIDE([YTDBudget], [BudgetAmountNet])
+
+Budget_GrossNet = IF(SELECTEDVALUE('Basis'[BasisName])="Net",CALCULATE('Budget'[BudgetAmountNet]),CALCULATE('Budget'[BudgetAmountGross]))
+
+ExpiringPremium = CALCULATE('DRAKE'[Premium_GWPNWP],USERELATIONSHIP('Calendar'[ExpirationDate],'DRAKE'[Expiration Date]),DATESBETWEEN('DRAKE'[Expiration Date],[FirstDate],[LastDate]))//CALCULATE('DRAKE'[Premium_GWPNWP], DATESBETWEEN('DRAKE'[Expiration Date],[FirstDate],[LastDate]))
+
+BudgetAmount_GWPNWP = IF(SELECTEDVALUE('Basis'[BasisName])="Net",CALCULATE('Budget'[BudgetAmount]),CALCULATE(SUM('Budget'[BudgetAmountGWP])))
+//IF(SELECTEDVALUE('Basis'[BasisName])="Net",CALCULATE(SUM('Budget'[BudgetAmountStraight]),DATESYTD('Date'[Date])),CALCULATE(SUM('Budget'[BudgetAmountGWP]),DATESYTD('Date'[Date])))
+
+BudgetAmount = SUM(Budget[BudgetAmountStraight]) --This is net premium
+
+Remaining % = 1-DIVIDE('DRAKE'[YTD $],[BudgetAmount_GWPNWP],0)
+
+Remaining $ = [YTD $]-[BudgetAmount_GWPNWP]
+
+Premium_RemainingYE =
+
+Premium_RemainingYE =
+VAR YearEnd =
+    DATE ( YEAR ( Date[Date] ), 12, 31 )
+RETURN
+    DATEDIFF ( DRAKE[Inception Date], YearEnd, MONTH)
+
+--Remaining premium that has to incept until the end of the current year.
+--Renewal Remaining = CALCULATE(DRAKE[Premium_RemainingYE])
+=' '''&right($(v_current_year),2)& ' Renewal remaining' - SUM(Aggr(sum({<$(v_set_CM_to_YEND)>} NWP), ID, NWP))
+
+--New premium that has an inception date until the end of the current year. YTD/CurrentMonthOfYear*(MonthsLeftInYear)
+--Estimated New Remaining
+=' '''&right($(v_current_year),2)& ' Estimated New Remaining' -
+
+DIVIDE(CALCULATE(DRAKE[YTD], NewOrRenewal[NewOrRenewal]='New'),DRAKE(CurrentMonthNum),0)*(12-NUM(MONTH(Date[Date])))
+
+SUM(Aggr(sum({<$(v_set_YTD), NewOrRenewal={'New'}>} NWP), ID, NWP))/NUM(MONTH(v_current_month))
+*(12-NUM(MONTH(v_current_month)))
+
+--Remaining premium multipled by .8075 factor plus YTD Renewals plus YTD New + (YTD New/CurrentMonthOfYear*(MonthsLeftInYear))
+--YE Forecast
+=' '''&right($(v_current_year),2)& ' YE Forecast' - 
+
+(CALCULATE(DRAKE[Premium_RemainingYE])*.8075)
++(CALCULATE(DRAKE[YTD], NewOrRenewal[NewOrRenewal]='Renewal))
++(CALCULATE(DRAKE[YTD], NewOrRenewal[NewOrRenewal]='New))
++((CALCULATE(DRAKE[YTD], NewOrRenewal[NewOrRenewal]='New))/(12-NUM(MONTH(Date[Date]))))
+
+(SUM(Aggr(sum({<$(v_set_YTD), NewOrRenewal={'New'}>} NWP), ID, NWP))/NUM(MONTH(NOW()))*(12-NUM(MONTH(NOW()))))
+
+=(SUM(Aggr(sum({<$(v_set_CM_to_YEND)>} NWP), ID, NWP))*.8075)
++
+//Renewal YTD Bound
+SUM(Aggr(sum({<$(v_set_YTD), NewOrRenewal={'Renewal'}>} NWP), ID, NWP))
++
+//New YTD
+SUM(Aggr(sum({<$(v_set_YTD), NewOrRenewal={'New'}>} NWP), ID, NWP))
++
+//UW numbers
+(SUM(Aggr(sum({<$(v_set_YTD), NewOrRenewal={'New'}>} NWP), ID, NWP))/NUM(MONTH(NOW()))*(12-NUM(MONTH(NOW()))))
+
+--Renewal Base
+=' '''&RIGHT(YEAR(NOW())+1,2) & ' Renewal Base' - IF(
+//D&O:
+MATCH(TriFocusCode,'671','680'),column(8)*.96,//.867,
+//EPL:
+IF(MATCH(TriFocusCode,'672','681'),
+column(8)*106.25,//*.8,
+IF(NOT MATCH(TriFocusCode,'672','681','671','680'),
+column(8))))
+
+--Use YTD and YTD Var % from DRAKE table
+
+IV. Calulated Columns
+
+BrokerContactFirstName = LEFT(DRAKE[Credited Broker Contact],FIND(" ",DRAKE[Credited Broker Contact],1)-1)
+BrokerContactLastName = RIGHT(DRAKE[Credited Broker Contact],FIND(" ",DRAKE[Credited Broker Contact],1)-1)
+Close = "mailto:"&DRAKE[Underwriter Email]&"?subject="&DRAKE[Underwriter Email]&" - Close Account"
+View = Column data type must be set to Web URL and have an http or https prefix
+EmailUW_Policy = "mailto:"&DRAKE[Underwriter Email]&"?subject="&DRAKE[Underwriter Email]&" - Regarding Account"
+EmailUW_SQB = "mailto:"&BrokerProductivity[Underwriter Email]&"?subject="&BrokerProductivity[Underwriter Email]&" - Regarding Account"
+EmailSupport = mailto:&drakesupport@beazley.com&"?cc="&Service.Desk@beazley.com&"&subject="&"OneView Issue/Inquiry"
+
+--Email Broker
+--Policy
+EmailBroker_Policy = "mailto:"&DRAKE[Credited Broker Email]&"?subject="&DRAKE[InsuredName]&" - Regarding Account"
+--SQB
+EmailBroker_SQB = "mailto:"&BrokerProductivity[Credited Broker Email]&"?subject="&BrokerProductivity[InsuredName]&" - Regarding Account"
+--Same contacts, multiple emails will throw relational error.
+
+Variations:
+
+- EmailBroker_Policy = "mailto:"&DRAKE[Credited Broker Email]&"?subject="&DRAKE[InsuredName]&" - Regarding Account"&"&body=Dear " & DRAKE[Credited Broker Contact] & "," & DRAKE[EmailBroker_Policy_Body]
+
+- EmailBroker_Policy = "mailto:"&DRAKE[Credited Broker Email]&"?subject="&DRAKE[InsuredName]&" - Regarding Account"&"&body=Dear " & [BrokerContactFirstName] & "," & DRAKE[EmailBroker_Policy_Body]
+
+EmailBroker_Policy_Body = UNICHAR(10) & "In regards to our upcoming renewal, set to expire on " & DRAKE[Expiration Date] & ", we will require the following in order to offer terms:
+
+- Current financial statements
+- The attached application completed
+- XXXXX (uw can add here)
+
+Regards," &
+DRAKE[Underwriter]
+
+PolCount_Arrow_Formatting = IF([Var Pol %]>0, 2, 1)
+PolCount_Arrow_Indicator = IF([Var Pol %]>0,UNICHAR(11014),UNICHAR(11015))
+Var Pol % = DIVIDE(('DRAKE'[Policy #]-'DRAKE'[Pol # PY]),'DRAKE'[Pol # PY])
+
+Premium_Arrow_Formatting = IF([Var %]>0, 2, 1)
+Premium_Arrow_Indicator = IF([Var %]>0,UNICHAR(11014),UNICHAR(11015))
+--Already have Var % in measure library
+
+SubmitQuote_Formatting = IF([S/Q Var %]>0, 2, 1)
+Premium_Arrow_Indicator = IF([S/Q Var %]>0,UNICHAR(11014),UNICHAR(11015))
+
+QuoteBind_Formatting = IF([Q/B Var %]>0, 2, 1)
+QuoteBind_Arrow_Indicator = IF([Q/B Var %]>0,UNICHAR(11014),UNICHAR(11015))
+
+
+--Column Renames - Policy
+
+PolicyNumberForMeasure
+GWPStraight
+NWPStraight
+RiskIDForMeasure
+
+--Add - Date
+
+- ExpirationDate
+- MMYYYY
+
+--Calculated columns - Date
+
+EffectiveQuarter = ROUNDUP(MONTH([Date])/3, 0)
+EffectiveYear = YEAR('Date'[Year])
+
+Power Station:
+
+HighLevelNAICS = LEFT(DRAKE[NAICS Description],2)
+ReveneBucket = IF(DRAKE[Revenue] >= 0.00 && DRAKE[Revenue] <= 35000000.00,
+"0-35M",
+IF(DRAKE[Revenue] >= 35000001.00 && DRAKE[Revenue] <= 100000000.00,
+"35-100M",
+IF(DRAKE[Revenue] >= 100000001.00 && DRAKE[Revenue] <= 25000000.00,
+"100-250M",
+IF(DRAKE[Revenue] >= 250000001.00 && DRAKE[Revenue] <= 500000000.00,
+"250-500M",
+IF(DRAKE[Revenue] >= 500000001.00 && DRAKE[Revenue] <= 1000000000.00,
+"750M-1B",
+IF(DRAKE[Revenue] >= 1000000001.00 && DRAKE[Revenue] <= 3000000000.00,
+"1-3B",
+IF(DRAKE[Revenue] >= 3000000001.00,
+">3B",
+"No revenue")
+))))))
+
+VI. Functions
+
+RankIdentifier = VAR Broker = SELECTEDVALUE(DRAKE[Credited Broker Name])
+    RETURN IF(Broker <> BLANK(), "#CF118C","#000000")
+
+VII. Theme
+
+VIII. Special Arrangements
+
+Claims:
+
+Relationships required:
+
+ProductName
+Source
+Team
+?GlobalTeam
+Department
+InsuredName
+Lost Account
+New or Renewal
+Expiration Date
+Date/RoundedInceptionDate
+BrokerOffice
+RiskID
+BrokerParent
+Team
+Region
+BrokerContact
+CobCode
+
+
+
+--In Claims entity:
+
+Paid = CALCULATE(SUM(Claims[TotalPaidAmount]))
+
+Paid_Lost_Accounts = IF(SELECTEDVALUE('Timeframe'[TimeframeCode])="YTD",
+CALCULATE('Claims'[Paid], DATESYTD('Date'[Date]),USERELATIONSHIP('Date'[ExpirationDate],'Claims'[Expiration Date]), 'LostAccount'[Lost account]="Yes"),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="R12",
+CALCULATE('Claims'[Paid], DATESINPERIOD('Date'[Date],MAX('Date'[Date]),-12,MONTH),USERELATIONSHIP('Date'[ExpirationDate],'Claims'[Expiration Date]), 'LostAccount'[Lost account]="Yes"),
+IF(SELECTEDVALUE ('Timeframe'[TimeframeCode])="Date range",
+CALCULATE('Claims'[Paid], USERELATIONSHIP('Date'[ExpirationDate],'Claims'[Expiration Date]), 'LostAccount'[Lost account]="Yes"))))
+
+Paid_Without_Fees = CALCULATE(SUM(Claims[TotalPaidAmount]))-CALCULATE(SUM(Claims[TotalFeesAmount]))
+
+--In DRAKE entity:
+LossRatio = DIVIDE('Claims'[Paid],'DRAKE'[NWP],0)
+
+LossRatio_Lost_Accounts = DIVIDE('Claims'[Paid_Lost_Accounts],'DRAKE'[Premium_Lost_Accounts],0)
+
+Selections:
+
+Selections page measures:
+
+SelectedValuesBroker = "Broker(s): " &
+IF (
+    ISFILTERED ( 'BrokerParent'[Parent name] ),
+    CONCATENATEX ( FILTERS ( 'BrokerParent'[Parent name] ), 'BrokerParent'[Parent name], ", " ),
+    "All"
+)
+
+SelectedValuesBrokerOffice = "Broker Office(s): " &
+IF (
+    ISFILTERED ( 'BrokerOffice'[Credited Broker Name] ),
+    CONCATENATEX ( FILTERS ( 'BrokerOffice'[Credited Broker Name] ), 'BrokerOffice'[Credited Broker Name], ", " ),
+    "All"
+)
+
+SelectedValuesBrokerState = "Broker State(s): " &
+IF (
+    ISFILTERED ( 'BrokerState'[Credited Broker State] ),
+    CONCATENATEX ( FILTERS ( 'BrokerState'[Credited Broker State] ), 'BrokerState'[Credited Broker State], ", " ),
+    "All"
+)
+
+SelectedValuesUnderwriter = "Broker State(s): " &
+IF (
+    ISFILTERED ( 'Underwriter'[Underwriter] ),
+    CONCATENATEX ( FILTERS ( 'Underwriter'[Underwriter] ), 'Underwriter'[Underwriter], ", " ),
+    "All"
+)
+
+SelectedValuesFocusGroup = "Focus Group: " &
+IF (
+    ISFILTERED ( 'Team'[Team] ),
+    CONCATENATEX ( FILTERS ( 'Team'[Team] ), 'Team'[Team], ", " ),
+    "All"
+)
+
+SelectedValuesGeography = "Geography: " &
+IF (
+    ISFILTERED ( 'SuperRegion'[SuperRegion] ),
+    CONCATENATEX ( FILTERS ( 'SuperRegion'[SuperRegion] ), 'SuperRegion'[SuperRegion], ", " ),
+    "All"
+)
+
+SelectedValuesNewRenewal = "New/Renewal: " &
+IF (
+    ISFILTERED ( 'NewRenewal'[NewOrRenewal] ),
+    CONCATENATEX ( FILTERS ( 'NewRenewal'[NewOrRenewal] ), 'NewRenewal'[NewOrRenewal], ", " ),
+    "All"
+)
+
+SelectedValuesRegion = "Region: " &
+IF (
+    ISFILTERED ( 'Region'[Region] ),
+    CONCATENATEX ( FILTERS ( 'Region'[Region] ), 'Region'[Region], ", " ),
+    "All"
+)
+
+SelectedValuesSubRegion = "Sub-Region: " &
+IF (
+    ISFILTERED ( 'DRAKE'[SubRegion] ),
+    CONCATENATEX ( FILTERS ( 'DRAKE'[SubRegion] ), 'DRAKE'[SubRegion], ", " ),
+    "All"
+)
+
+ViewFilters = "View Filters"
+
+Tooltip page with custom margins - W 350px, H 375px
+
+Hyperlink + Query String Filter
+
+HyperlinkQueryString = https://app.powerbi.com/groups/ee843c35-bae3-4eb8-b3cf-40b6ad7efcbb/reports/de66e454-b3af-4f94-9a30-11de5871c61a/ReportSectionbf914d7f00a0ecb140a0?filter=DRAKE/[CreditedBrokerContactKey] eq ' & SELECTEDVALUE('DRAKE'[CreditedBrokerContactKey]) & "' and 'DRAKE'/[CreditedBrokerKey] eq '" & SELECTEDVALUE('DRAKE'[CreditedBrokerKey]) &
+"' and 'BrokerProductivity'/[CreditedBrokerContactKey] eq '" & SELECTEDVALUE('BrokerProductivity'[CreditedBrokerContactKey]) & "' and 'BrokerProductivity'/[CreditedBrokerKey] eq '" & SELECTEDVALUE('BrokerProductivity'[CreditedBrokerKey]) & "'"
+
+Useful but Not Featured
+
+YTD Sales = CALCULATE(SUM(Sales[Sales Amount]),DATESYTD('Date'[Date],"12/31"))
+Last YTD Sales = CALCULATE(SUM(Sales[Sales Amount]),DATESYTD(dateadd('Date'[Date],-1,Year),"12/31"))
+This year Sales = CALCULATE(SUM(Sales[Sales Amount]),DATESYTD(ENDOFYEAR('Date'[Date]),"12/31"))
+Last year Sales = CALCULATE(SUM(Sales[Sales Amount]),DATESYTD(ENDOFYEAR(dateadd('Date'[Date],-1,Year)),"12/31"))
+Last to last YTD Sales = CALCULATE(SUM(Sales[Sales Amount]),DATESYTD(dateadd('Date'[Date],-2,Year),"12/31"))
+Year behind Sales = CALCULATE(SUM(Sales[Sales Amount]),dateadd('Date'[Date],-1,Year))
+//Only year vs Year, not a level below
+
+This Year = CALCULATE(sum('order'[Qty]),filter(ALL('Date'),'Date'[Year]=max('Date'[Year])))
+Last Year = CALCULATE(sum('order'[Qty]),filter(ALL('Date'),'Date'[Year]=max('Date'[Year])-1))
+
+Year Rank = RANKX(all('Date'),'Date'[Year Start date],,ASC,Dense)           
+This Year = CALCULATE(sum('order'[Qty]), FILTER(ALL('Date'),'Date'[Year Rank]=max('Date'[Year Rank])))
+Last Year = CALCULATE(sum('order'[Qty]), FILTER(ALL('Date'),'Date'[Year Rank]=max('Date'[Year Rank])-1))
+
+PolicyholderLifespan = DATEDIFF(UnifiedDetail[FirstYear],UnifiedDetail[MostRecentYear],YEAR)
+
+DataExtracted = "Data refreshed on: " & FORMAT(MAX('UnifiedDetail'[DataAsOf]),"MM/DD/YY")
+
+PolicyholderLifespan average per Policy Number = 
+AVERAGEX(
+              KEEPFILTERS(VALUES('UnifiedDetail'[Policy Number])),
+              CALCULATE([PolicyholderLifespan])
+)
+
+PolicyholderLifespan_Average = AVERAGEX(VALUES(UnifiedDetail[Policy Number]), CALCULATE(DATEDIFF(UnifiedDetail[FirstYear],UnifiedDetail[MostRecentYear],YEAR))) & " years"
